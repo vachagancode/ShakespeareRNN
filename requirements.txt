@@ -1,0 +1,4 @@
+pandas==2.2.3
+spacy==3.8.4
+torch==2.5.1+cu118
+tqdm==4.66.5
