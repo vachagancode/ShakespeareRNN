@@ -25,7 +25,7 @@ def train(m=None):
         start_epoch = m_data["epoch"]
         optimizer_s_d = m_data["optimizer_state_dict"]
         lr = m_data["learning_rate"][0]
-        scheduler_s_d = m_data["scheduler_state_dict"]
+        # scheduler_s_d = m_data["scheduler_state_dict"]
         try:
             loss = m_data["loss"]
         except KeyError:
@@ -54,8 +54,8 @@ def train(m=None):
     scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-4, total_steps=len(train_dataloader)*cfg["num_epochs"], pct_start=0.3)
     # scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-4, steps_per_epoch=len(train_dataloader), epochs=50,pct_start=0.3)
 
-    if scheduler_s_d:
-        scheduler.load_state_dict(scheduler_s_d)
+    # if scheduler_s_d:
+    #     scheduler.load_state_dict(scheduler_s_d)
         
     best_loss = loss
 
