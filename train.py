@@ -51,7 +51,7 @@ def train(m=None):
     train_dataloader, test_dataloader = create_dataloaders(train_data, test_data)
 
     loss_fn = nn.CrossEntropyLoss()
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-4, steps_per_epoch=len(train_dataloader), epochs=50,pct_start=0.3)
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-4, total_steps=len(train_dataloader)*cfg["num_epochs"], pct_start=0.3)
     # scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-4, steps_per_epoch=len(train_dataloader), epochs=50,pct_start=0.3)
 
     if scheduler_s_d:
