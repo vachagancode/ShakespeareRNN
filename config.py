@@ -3,7 +3,7 @@ def get_config():
         "input_size" : 100,
         "hidden_size": 1024,
         "vocab_size": 39, # len(chars)
-        "num_layers": 4,
+        "num_layers": 2,
         "dropout": 0.2,
 
         "annotations_file" : "annotations_file.csv",
