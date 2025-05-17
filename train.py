@@ -38,6 +38,7 @@ def train(m=None):
         scheduler_state_dict["total_steps"] = scheduler_state_dict["total_steps"] + scheduler_total_steps
         scheduler.load_state_dict(scheduler_state_dict)
         start_epoch = m_data["epoch"]
+        lr = m_data["learning_rate"]
         try:
             loss = m_data["loss"]
         except KeyError:
