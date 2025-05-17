@@ -12,14 +12,13 @@ from dataset import ShakespeareDataset, create_datasets, create_dataloaders
 from load_data import tokenize_sequence, detokenize_sequence
 
 def train(m=None):
+    cfg = get_config()
     # create dataloaders
     dataset = ShakespeareDataset(annotations_file=cfg["annotations_file"], max_length=cfg["max_length"])
     train_data, test_data = create_datasets(dataset)
     train_dataloader, test_dataloader = create_dataloaders(train_data, test_data)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    cfg = get_config()
 
     model = create_lstm(config=cfg, device=device)
     if m is not None:
