@@ -1,4 +1,4 @@
-import torch
+`import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -12,19 +12,33 @@ from dataset import ShakespeareDataset, create_datasets, create_dataloaders
 from load_data import tokenize_sequence, detokenize_sequence
 
 def train(m=None):
+    # create dataloaders
+    dataset = ShakespeareDataset(annotations_file=cfg["annotations_file"], max_length=cfg["max_length"])
+    train_data, test_data = create_datasets(dataset)
+    train_dataloader, test_dataloader = create_dataloaders(train_data, test_data)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     cfg = get_config()
-    model = create_lstm(config=cfg, device=device)
 
+    model = create_lstm(config=cfg, device=device)
     if m is not None:
         m_data = torch.load(f=m, map_location=device, weights_only=True)
+        
         model_state_dict = m_data["model_state_dict"]
-
+        
         model.load_state_dict(model_state_dict)
+
+        optimizer = torch.optim.Adam(model.parameters(), lr=m_data["learning_rate"][0]) 
+        optimizer.load_state_dict(m_data["optimizer_state_dict"])
+
+        new_max_lr = m_data["learning_rate"][0] + 0.03e-5
+        scheduler_total_steps = len(train_dataloader)*cfg["num_epochs"]
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=new_max_lr, total_steps=scheduler_total_steps, pct_start=0.3)
+        scheduler_state_dict = m_data["scheduler_state_dict"]
+        scheduler_state_dict["total_steps"] = scheduler_state_dict["total_steps"] + scheduler_total_steps
+        scheduler.load_state_dict(scheduler_state_dict)
         start_epoch = m_data["epoch"]
-        optimizer_s_d = m_data["optimizer_state_dict"]
-        lr = m_data["learning_rate"][0]
         try:
             loss = m_data["loss"]
         except KeyError:
@@ -34,23 +48,14 @@ def train(m=None):
         lr=1e-4
         loss = float('inf')
 
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.003, pct_start=0.3, total_steps=cfg["epochs"]*int(len(train_dataloader)))
+
     end_epochs = start_epoch + cfg["num_epochs"]
 
     model.to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    
-    if m is not None and optimizer_s_d:
-        optimizer.load_state_dict(optimizer_s_d)
-
-    # Load the dataset and dataloader
-
-    dataset = ShakespeareDataset(annotations_file=cfg["annotations_file"], max_length=cfg["max_length"])
-    train_data, test_data = create_datasets(dataset)
-    train_dataloader, test_dataloader = create_dataloaders(train_data, test_data)
-
     loss_fn = nn.CrossEntropyLoss()
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=3e-4, total_steps=len(train_dataloader)*cfg["num_epochs"], pct_start=0.3)
         
     best_loss = loss
 
