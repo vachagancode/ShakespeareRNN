@@ -21,6 +21,7 @@ def train(m=None):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = create_lstm(config=cfg, device=device)
+    model.to(device)
     if m is not None:
         m_data = torch.load(f=m, map_location=device, weights_only=True)
         
@@ -52,8 +53,6 @@ def train(m=None):
         scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.003, pct_start=0.3, total_steps=cfg["epochs"]*int(len(train_dataloader)))
 
     end_epochs = start_epoch + cfg["num_epochs"]
-
-    model.to(device)
 
     loss_fn = nn.CrossEntropyLoss()
         
